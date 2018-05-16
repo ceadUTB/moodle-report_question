@@ -67,7 +67,6 @@ if ($viewCap) {
             JOIN {question_attempts} qa ON qa.id = qas.questionattemptid
             JOIN {question} q ON q.id = '.$question->id.'
             WHERE qas.userid = '. $student->id .' AND qas.state IN ("gradedwrong", "gradedright") GROUP BY qas.state ORDER BY q.id ');
-          print_r($response);
             if (sizeof($response)>0) {
                 foreach ($response as $data) {
                   if (array_key_exists($data->question_name,$questionresponse)) {
