@@ -6,17 +6,16 @@ Report of questions for a quiz activity; you can see:
 #### How to install
 - GIT Version:
   - In the top-level folder of your Moodle install:
-   -  git clone git@github.com:AncaSystems/questionsreport.git mod/quiz/report/questions
-   - echo '/mod/quiz/report/questions' >> .git/info/exclude
+   -  git clone git@github.com:AncaSystems/questionsreport.git report/questions
+   - echo 'report/questions' >> .git/info/exclude
 
 ### How to use
 - Go to the course
-- Select the Quiz activity
 - In the administration block select report >> Question Report
 
 
 ### Contributors
-[See all](https://github.com/AncaSystems/moodle-questionsreport/graphs/contributors)
+[See all](https://github.com/AncaSystems/moodle-report_question/graphs/contributors)
 
 ### License
-[Apache 2.0](https://github.com/AncaSystems/moodle-questionsreport/blob/master/LICENSE)
+[Apache 2.0](https://github.com/AncaSystems/moodle-report_question/blob/master/LICENSE)
