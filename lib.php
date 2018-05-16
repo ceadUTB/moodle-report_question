@@ -27,7 +27,7 @@ function QuestionReport($questiondata, $name){
 /**
 * Table Function
 */
-function output_question_report_data($QuestionsReports){
+function output_question_report_data($table,$QuestionsReports){
   global $OUTPUT;
   $questioninfotable = new html_table();
   $questioninfotable->aling = array('center','center');
@@ -64,7 +64,7 @@ function everything_download_options(moodle_url $reporturl){
 */
 function download_questions_report_table($table,$QuestionsReports){
   if ($table->is_downloading() == 'html') {
-    echo output_question_report_data($questionReport,$quiz);
+    echo output_question_report_data($table,$QuestionsReports);
     return;
   }
 

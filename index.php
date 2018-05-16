@@ -81,7 +81,7 @@ if ($viewCap) {
       }
 
       foreach ($questionresponse as $questionname => $questiondata) {
-        array_push($questionReport, $questionReport($questiondata,$questionname));
+        array_push($questionReport, QuestionReport($questiondata,$questionname));
       }
 
 
@@ -92,7 +92,7 @@ if ($viewCap) {
           if (!$table->is_downloading()) {
             echo $OUTPUT->header();
           }
-         output_question_report_data($questionReport);
+         output_question_report_data($table,$questionReport);
          echo everything_download_options($reporturl);
          echo $OUTPUT->footer();
       }
