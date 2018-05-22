@@ -20,6 +20,7 @@ $questionReport = array();
 $questions_aux;
 
 $context = context_course::instance($courseid);
+$type = optional_param('type', 'global',PARAM_TEXT);
 $download = optional_param('download', '', PARAM_ALPHA);
 
 require_capability('mod/quiz:grade', $context);
@@ -52,32 +53,70 @@ if ($viewCap) {
       $table->is_downloading($download,$filename,
                                    get_string('questions:componentname', 'report_questions'));
        // Quiz Questions
-     $questions = $DB->get_records_sql('SELECT q.id,q.qtype from {question} q 
+     $questions = $DB->get_records_sql('SELECT q.id,q.qtype,q.name from {question} q 
                                                 INNER JOIN {question_categories} qc ON qc.contextid = '.$context->id.' 
                                                 WHERE q.category = qc.id');
       
 
-      // get all students
-      $students = get_role_users(5, $context, true);
-
-      //Catching attempts and responses
-      foreach ($questions as $question) {
-        foreach ($students as $student) {
-          $response = $DB->get_records_sql('SELECT qas.state as response, q.name AS question_name FROM {question_attempt_steps} qas
-            JOIN {question_attempts} qa ON qa.id = qas.questionattemptid
-            JOIN {question} q ON q.id = '.$question->id.'
-            WHERE qas.userid = '. $student->id .' AND qas.state IN ("gradedwrong", "gradedright") GROUP BY qas.state ORDER BY q.id ');
-            if (sizeof($response)>0) {
-                foreach ($response as $data) {
-                  if (array_key_exists($data->question_name,$questionresponse)) {
-                    array_push($questionresponse[$data->question_name], $data->response );
-                  }else{
-                    $questionresponse[$data->question_name] = array();
-                    array_push($questionresponse[$data->question_name], $data->response );
+      switch ($type){
+        case 'students': 
+              // get all students
+              $students = get_role_users(5, $context, true);
+              //Catching attempts and responses
+              if(sizeof($students) > 0){
+                foreach ($questions as $question) {
+                  foreach ($students as $student) {
+                    $response = $DB->get_records_sql('SELECT qas.state as response, q.name AS question_name FROM {question_attempt_steps} qas
+                                                  INNER JOIN {quiz_attempts} qa ON qa.quiz = qu.id AND qa.userid = '.$student->id.'
+                                                  INNER JOIN {quiz} qu ON qu.course = '.$courseid.'
+                                                  INNER JOIN {quiz_slots} qs ON qs.quizid = qu.id AND qu.questionid = '.$question->id.'
+                                                  WHERE qas.state IN ("gradedwrong", "gradedright") GROUP BY qas.state');
+                    if (sizeof($response)>0) {
+                      foreach ($response as $data) {
+                        if (array_key_exists($data->question_name,$questionresponse)) {
+                            array_push($questionresponse[$data->question_name], $data->response );
+                        }else{
+                            $questionresponse[$data->question_name] = array();
+                            array_push($questionresponse[$data->question_name], $data->response );
+                            }
+                      }
+                    }else{
+                      $questionresponse[$question->name] = array();
+                      array_push($questionresponse[$data->name], array("gradedwrong" => 0,"gradedright" => 0));
+                    }
                   }
                 }
+              }else{
+                redirect(new moodle_url($reporturl));
+              }
+              break;
+        case 'global':
+            foreach ($questions as $question) {
+              $response = $DB->get_records_sql('SELECT qas.state as response, q.name AS question_name FROM {question_attempt_steps} qas
+                                                INNER JOIN {quiz} qu ON qu.course = '.$courseid.'
+                                                INNER JOIN {quiz_attempts} qa ON qa.quiz = qu.id
+                                                INNER JOIN {question} q ON q.id = '.$question->id.'
+                                                INNER JOIN {quiz_slots} qs ON qs.quizid = qu.id AND qs.questionid = q.id
+                                                WHERE qas.state IN ("gradedwrong", "gradedright") GROUP BY qas.state');
+              
+                if (sizeof($response)>0) {
+                    foreach ($response as $data) {
+                          if (array_key_exists($data->question_name,$questionresponse)) {
+                            array_push($questionresponse[$data->question_name], $data->response );
+                          }else{
+                            $questionresponse[$data->question_name] = array();
+                            array_push($questionresponse[$data->question_name], $data->response );
+                          }
+                    }
+                }else{
+                  $questionresponse[$question->name] = array();
+                  array_push($questionresponse[$data->name], array("gradedwrong" => 0,"gradedright" => 0));
+                }
             }
-        }
+            break;
+        default:
+              redirect(new moodle_url($reporturl));
+              break;
       }
 
       foreach ($questionresponse as $questionname => $questiondata) {
@@ -100,5 +139,5 @@ if ($viewCap) {
 
      
 }else {
-  redirect(new moodle_url('/'));
+  redirect(new moodle_url('/my/'));
 }

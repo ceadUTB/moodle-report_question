@@ -75,7 +75,8 @@ class questionreport{
   *
   */
   public function RightPercent(){
-    return ($this->right / $this->times)*100;
+    if($this->right > 0) return ($this->right / $this->times)*100;
+    return 0;
   }
 
   /**
@@ -84,7 +85,8 @@ class questionreport{
   *
   */
   public function WrongPercent(){
-    return ($this->wrong / $this->times) * 100;
+    if($this->wrong > 0) return ($this->wrong / $this->times)*100;
+    return 0;
   }
 
 
