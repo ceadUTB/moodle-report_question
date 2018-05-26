@@ -52,11 +52,14 @@ if ($viewCap) {
 
       $table->is_downloading($download,$filename,
                                    get_string('questions:componentname', 'report_questions'));
-       // Quiz Questions
-     $questions = $DB->get_records_sql('SELECT q.id,q.qtype,q.name from {question} q 
+
+
+       //Global Questions
+      $questions = $DB->get_records_sql('SELECT q.id,q.qtype,q.name from {question} q 
                                                 INNER JOIN {question_categories} qc ON qc.contextid = '.$context->id.' 
                                                 WHERE q.category = qc.id');
-      
+      //Quices
+      $quices = $DB->get_records_sql('SELECT q.id FROM {quiz} q WHERE q.course = '.$courseid);
 
       switch ($type){
         case 'students': 
@@ -64,65 +67,71 @@ if ($viewCap) {
               $students = get_role_users(5, $context, true);
               //Catching attempts and responses
               if(sizeof($students) > 0){
-                foreach ($questions as $question) {
-                  foreach ($students as $student) {
-                    $response = $DB->get_records_sql('SELECT qas.state as response, q.name AS question_name FROM {question_attempt_steps} qas
-                                                  INNER JOIN {quiz_attempts} qa ON qa.quiz = qu.id AND qa.userid = '.$student->id.'
-                                                  INNER JOIN {quiz} qu ON qu.course = '.$courseid.'
-                                                  INNER JOIN {quiz_slots} qs ON qs.quizid = qu.id AND qu.questionid = '.$question->id.'
-                                                  WHERE qas.state IN ("gradedwrong", "gradedright") GROUP BY qas.state');
+                foreach($students as $student){
+                  foreach($quices as $quiz){
+                    $response = $DB->get_records_sql('SELECT
+                                                         DISTINCT(qas.userid), qas.state AS response, q.name AS question_name
+                                                      FROM mdl_quiz_attempts quiza
+                                                      JOIN mdl_question_usages qu ON qu.id = quiza.uniqueid
+                                                      JOIN mdl_question_attempts qa ON qa.questionusageid = qu.id
+                                                      JOIN mdl_question_attempt_steps qas ON qas.questionattemptid = qa.id
+                                                      JOIN mdl_question q ON q.id = qa.questionid
+                                                      LEFT JOIN mdl_question_attempt_step_data qasd ON qasd.attemptstepid = qas.id
+                                                      
+                                                      WHERE quiza.quiz = '.$quiz->id.' AND qas.state IN ("gradedwrong", "gradedright") AND quiza.userid ='.$student->id);
                     if (sizeof($response)>0) {
-                      foreach ($response as $data) {
-                        if (array_key_exists($data->question_name,$questionresponse)) {
-                            array_push($questionresponse[$data->question_name], $data->response );
-                        }else{
-                            $questionresponse[$data->question_name] = array();
-                            array_push($questionresponse[$data->question_name], $data->response );
+                      foreach ($response as $data) { 
+                            if (array_key_exists($data->question_name,$questionresponse)) {
+                             
+                              array_push($questionresponse[$data->question_name], $data->response );
+                            }else{
+                              $questionresponse[$data->question_name] = array();
+                              array_push($questionresponse[$data->question_name], $data->response );
                             }
                       }
-                    }else{
-                      $questionresponse[$question->name] = array();
-                      array_push($questionresponse[$data->name], array("gradedwrong" => 0,"gradedright" => 0));
                     }
                   }
+                foreach ($questions as $question) {
+                  if (!array_key_exists($question->name,$questionresponse)) {
+                    $questionresponse[$question->name] = array();
+                    array_push($questionresponse[$data->name], array("gradedwrong" => 0,"gradedright" => 0));
+                  }
+                }
                 }
               }else{
                 redirect(new moodle_url($reporturl));
               }
               break;
         case 'global':
-
-            
-              $quices = $DB->get_records_sql('SELECT q.id FROM {quiz} q WHERE q.course = '.$courseid);
-              foreach($quices as $quiz){
-                $response = $DB->get_records_sql('SELECT
-                                                     DISTINCT(qas.userid), qas.state AS response, q.name AS question_name
-                                                  FROM mdl_quiz_attempts quiza
-                                                  JOIN mdl_question_usages qu ON qu.id = quiza.uniqueid
-                                                  JOIN mdl_question_attempts qa ON qa.questionusageid = qu.id
-                                                  JOIN mdl_question_attempt_steps qas ON qas.questionattemptid = qa.id
-                                                  JOIN mdl_question q ON q.id = qa.questionid
-                                                  LEFT JOIN mdl_question_attempt_step_data qasd ON qasd.attemptstepid = qas.id
-                                                  
-                                                  WHERE quiza.quiz = '.$quiz->id.' AND qas.state IN ("gradedwrong", "gradedright")');
-                if (sizeof($response)>0) {
-                  foreach ($response as $data) { 
-                        if (array_key_exists($data->question_name,$questionresponse)) {
-                         
-                          array_push($questionresponse[$data->question_name], $data->response );
-                        }else{
-                          $questionresponse[$data->question_name] = array();
-                          array_push($questionresponse[$data->question_name], $data->response );
-                        }
+        foreach($quices as $quiz){
+          $response = $DB->get_records_sql('SELECT
+                                               DISTINCT(qas.userid), qas.state AS response, q.name AS question_name
+                                            FROM mdl_quiz_attempts quiza
+                                            JOIN mdl_question_usages qu ON qu.id = quiza.uniqueid
+                                            JOIN mdl_question_attempts qa ON qa.questionusageid = qu.id
+                                            JOIN mdl_question_attempt_steps qas ON qas.questionattemptid = qa.id
+                                            JOIN mdl_question q ON q.id = qa.questionid
+                                            LEFT JOIN mdl_question_attempt_step_data qasd ON qasd.attemptstepid = qas.id
+                                            
+                                            WHERE quiza.quiz = '.$quiz->id.' AND qas.state IN ("gradedwrong", "gradedright")');
+          if (sizeof($response)>0) {
+            foreach ($response as $data) { 
+                  if (array_key_exists($data->question_name,$questionresponse)) {
+                   
+                    array_push($questionresponse[$data->question_name], $data->response );
+                  }else{
+                    $questionresponse[$data->question_name] = array();
+                    array_push($questionresponse[$data->question_name], $data->response );
                   }
-                }
-              }
-            foreach ($questions as $question) {
-              if (!array_key_exists($question->name,$questionresponse)) {
-                $questionresponse[$question->name] = array();
-                array_push($questionresponse[$data->name], array("gradedwrong" => 0,"gradedright" => 0));
-              }
             }
+          }
+        }
+      foreach ($questions as $question) {
+        if (!array_key_exists($question->name,$questionresponse)) {
+          $questionresponse[$question->name] = array();
+          array_push($questionresponse[$data->name], array("gradedwrong" => 0,"gradedright" => 0));
+        }
+      }
             break;
         default:
               redirect(new moodle_url($reporturl));
