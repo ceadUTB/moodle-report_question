@@ -11,7 +11,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
 * Model translate Function
 */
-function QuestionReport($questiondata, $name){
+function QuestionReport($questiondata, $id ,$name){
   $QuestionReport = new \report_questions\questionreport($name,sizeof($questiondata));
   foreach ($questiondata as $data) {
     if ($data == "gradedwrong") {

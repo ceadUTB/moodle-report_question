@@ -21,7 +21,7 @@ class report_questions_table extends flexible_table{
   public function questions_setup($courseid, $reporturl){
     $this->$courseid = $courseid;
 
-    $columns = array('name','times', 'right','rightpercent', 'wrong', 'wrongpercent');
+    $columns = array('id','name','times', 'right','rightpercent', 'wrong', 'wrongpercent');
     $headers = array(get_string('question_name','report_questions'),
                                      get_string('question_times','report_questions'),
                                      get_string('question_right','report_questions'),
@@ -49,6 +49,14 @@ class report_questions_table extends flexible_table{
     return $name;
   }
 
+  protected function col_id($QuestionReport){
+    $id = $QuestionReport->get_id();
+    if ($this->is_downloading()) {
+      return $id;
+    }
+    return $id;
+  }
+  
   protected function col_times($QuestionReport){
     $times = $QuestionReport->get_times();
     if ($this->is_downloading()) {

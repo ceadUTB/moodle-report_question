@@ -15,9 +15,11 @@ class questionreport{
   protected $wrong = 0;
   protected $name;
   protected $times = 0;
+  protected $id;
 
-  function __construct( $name, $times){
+  function __construct( $id,$name, $times){
     $this->name = $name;
+    $this->id = $id;
     $this->times = $times;
   }
 
