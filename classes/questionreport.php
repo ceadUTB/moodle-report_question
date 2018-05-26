@@ -39,7 +39,15 @@ class questionreport{
   public function get_right(){
     return $this->right;
   }
-
+  /**
+  * get the id of the question
+  * @return int
+  *
+  */
+  public function get_id(){
+    return $this->id;
+    
+  }
   /**
   * get the number of times that question was answered wrong
   * @return int
