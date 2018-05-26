@@ -31,7 +31,7 @@ if ($viewCap) {
       $curso = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
       require_login($curso);
       
-      $options = array('id' => $courseid);
+      $options = array('id' => $courseid,'type' => $type);
       $reporturl = new moodle_url('/report/questions/index.php', $options);
 
       $PAGE->set_url('/report/questions/index.php',$options);
@@ -103,35 +103,35 @@ if ($viewCap) {
               }
               break;
         case 'global':
-        foreach($quices as $quiz){
-          $response = $DB->get_records_sql('SELECT
-                                               DISTINCT(qas.userid), qas.state AS response, q.name AS question_name
-                                            FROM mdl_quiz_attempts quiza
-                                            JOIN mdl_question_usages qu ON qu.id = quiza.uniqueid
-                                            JOIN mdl_question_attempts qa ON qa.questionusageid = qu.id
-                                            JOIN mdl_question_attempt_steps qas ON qas.questionattemptid = qa.id
-                                            JOIN mdl_question q ON q.id = qa.questionid
-                                            LEFT JOIN mdl_question_attempt_step_data qasd ON qasd.attemptstepid = qas.id
-                                            
-                                            WHERE quiza.quiz = '.$quiz->id.' AND qas.state IN ("gradedwrong", "gradedright")');
-          if (sizeof($response)>0) {
-            foreach ($response as $data) { 
-                  if (array_key_exists($data->question_name,$questionresponse)) {
-                   
-                    array_push($questionresponse[$data->question_name], $data->response );
-                  }else{
-                    $questionresponse[$data->question_name] = array();
-                    array_push($questionresponse[$data->question_name], $data->response );
-                  }
+            foreach($quices as $quiz){
+              $response = $DB->get_records_sql('SELECT
+                                                  DISTINCT(qas.userid), qas.state AS response, q.name AS question_name
+                                                FROM mdl_quiz_attempts quiza
+                                                JOIN mdl_question_usages qu ON qu.id = quiza.uniqueid
+                                                JOIN mdl_question_attempts qa ON qa.questionusageid = qu.id
+                                                JOIN mdl_question_attempt_steps qas ON qas.questionattemptid = qa.id
+                                                JOIN mdl_question q ON q.id = qa.questionid
+                                                LEFT JOIN mdl_question_attempt_step_data qasd ON qasd.attemptstepid = qas.id
+                                                
+                                                WHERE quiza.quiz = '.$quiz->id.' AND qas.state IN ("gradedwrong", "gradedright")');
+              if (sizeof($response)>0) {
+                foreach ($response as $data) { 
+                      if (array_key_exists($data->question_name,$questionresponse)) {
+                      
+                        array_push($questionresponse[$data->question_name], $data->response );
+                      }else{
+                        $questionresponse[$data->question_name] = array();
+                        array_push($questionresponse[$data->question_name], $data->response );
+                      }
+                }
+              }
             }
-          }
-        }
-      foreach ($questions as $question) {
-        if (!array_key_exists($question->name,$questionresponse)) {
-          $questionresponse[$question->name] = array();
-          array_push($questionresponse[$data->name], array("gradedwrong" => 0,"gradedright" => 0));
-        }
-      }
+            foreach ($questions as $question) {
+              if (!array_key_exists($question->name,$questionresponse)) {
+                $questionresponse[$question->name] = array();
+                array_push($questionresponse[$data->name], array("gradedwrong" => 0,"gradedright" => 0));
+              }
+            }
             break;
         default:
               redirect(new moodle_url($reporturl));
@@ -150,6 +150,15 @@ if ($viewCap) {
           if (!$table->is_downloading()) {
             echo $OUTPUT->header();
           }
+          switch($type){
+            case 'global':
+                $reporturlnav = new moodle_url('/report/questions/index.php', array('id' => $courseid,'type' => 'students'));
+                break;
+            case 'students':
+                $reporturlnav = new moodle_url('/report/questions/index.php', array('id' => $courseid,'type' => 'global'));
+                break;
+          } 
+         echo show_navs($reporturlnav,$type);
          output_question_report_data($table,$questionReport);
          echo everything_download_options($reporturl);
          echo $OUTPUT->footer();
