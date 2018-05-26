@@ -22,7 +22,7 @@ class report_questions_table extends flexible_table{
     $this->$courseid = $courseid;
 
     $columns = array('id','name','times', 'right','rightpercent', 'wrong', 'wrongpercent');
-    $headers = array(get_string('question_name','report_questions'),
+    $headers = array('Id',get_string('question_name','report_questions'),
                                      get_string('question_times','report_questions'),
                                      get_string('question_right','report_questions'),
                                      get_string('question_rightpercent','report_questions'),
