@@ -94,21 +94,21 @@ function report_questions_extend_navigation_course($navigation, $course, $contex
 function show_navs($url,$type){
   $nav = html_writer::start_tag('ul', array('class'=>"nav nav-tabs"));
   if($type == "global"){
-    $nav+= html_writer::start_tag('li', array('class'=>'active'));
-    $nav+= html_writer::link($url,'Global');
-    $nav+= html_writer::end_tag('li');
-    $nav+= html_writer::start_tag('li');
-    $nav+= html_writer::link($url,'Estudiantes');
-    $nav+= html_writer::end_tag('li');
+    $nav.= html_writer::start_tag('li', array('class'=>'active'));
+    $nav.= html_writer::link($url,'Global');
+    $nav.= html_writer::end_tag('li');
+    $nav.= html_writer::start_tag('li');
+    $nav.= html_writer::link($url,'Estudiantes');
+    $nav.= html_writer::end_tag('li');
   }else if($type == "students"){
-    $nav+= html_writer::start_tag('li');
-    $nav+= html_writer::link($url,'Global');
-    $nav+= html_writer::end_tag('li');
-    $nav+= html_writer::start_tag('li',array('class'=>'active'));
-    $nav+= html_writer::link($url,'Estudiantes');
-    $nav+= html_writer::end_tag('li');
+    $nav.= html_writer::start_tag('li');
+    $nav.= html_writer::link($url,'Global');
+    $nav.= html_writer::end_tag('li');
+    $nav.= html_writer::start_tag('li',array('class'=>'active'));
+    $nav.= html_writer::link($url,'Estudiantes');
+    $nav.= html_writer::end_tag('li');
   }
-  $nav+= html_writer::end_tag('ul');
+  $nav.= html_writer::end_tag('ul');
 
   return $nav;
 }
