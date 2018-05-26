@@ -70,7 +70,7 @@ if ($viewCap) {
                 foreach($students as $student){
                   foreach($quices as $quiz){
                     $response = $DB->get_records_sql('SELECT
-                                                         DISTINCT(qas.userid), qas.state AS response, q.name AS question_name, q.id AS question_id
+                                                         DISTINCT(qas.userid), qas.state AS response, q.name AS question_name
                                                       FROM mdl_quiz_attempts quiza
                                                       JOIN mdl_question_usages qu ON qu.id = quiza.uniqueid
                                                       JOIN mdl_question_attempts qa ON qa.questionusageid = qu.id
@@ -81,19 +81,20 @@ if ($viewCap) {
                                                       WHERE quiza.quiz = '.$quiz->id.' AND qas.state IN ("gradedwrong", "gradedright") AND quiza.userid ='.$student->id);
                     if (sizeof($response)>0) {
                       foreach ($response as $data) { 
-                            if (array_key_exists($data->question_id,$questionresponse)) {
-                              array_push($questionresponse[$data->question_id]['data'], $data->response );
+                            if (array_key_exists($data->question_name,$questionresponse)) {
+                             
+                              array_push($questionresponse[$data->question_name], $data->response );
                             }else{
-                              $questionresponse[$data->question_id] = array();
-                              array_push($questionresponse[$data->question_id], array('name' => $data->question_name, 'data' => $data->response) );
+                              $questionresponse[$data->question_name] = array();
+                              array_push($questionresponse[$data->question_name], $data->response );
                             }
                       }
                     }
                   }
                 foreach ($questions as $question) {
-                  if (!array_key_exists($question->id,$questionresponse)) {
-                    $questionresponse[$question->id] = array();
-                    array_push($questionresponse[$data->id], array('name' => $question->name, 'data' => array("gradedwrong" => 0,"gradedright" => 0)) );
+                  if (!array_key_exists($question->name,$questionresponse)) {
+                    $questionresponse[$question->name] = array();
+                    array_push($questionresponse[$data->name], array("gradedwrong" => 0,"gradedright" => 0));
                   }
                 }
                 }
@@ -137,8 +138,8 @@ if ($viewCap) {
               break;
       }
 
-      foreach ($questionresponse as $questionid => $questiondata) {
-        array_push($questionReport, QuestionReport($questiondata['data'],$questionid, $questiondata['name']));
+      foreach ($questionresponse as $questionname => $questiondata) {
+        array_push($questionReport, QuestionReport($questiondata,$questionname));
       }
 
 

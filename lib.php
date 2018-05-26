@@ -11,8 +11,8 @@ defined('MOODLE_INTERNAL') || die();
 /**
 * Model translate Function
 */
-function QuestionReport($questiondata, $id ,$name){
-  $QuestionReport = new \report_questions\questionreport($id,$name,sizeof($questiondata));
+function QuestionReport($questiondata, $name){
+  $QuestionReport = new \report_questions\questionreport($name,sizeof($questiondata));
   foreach ($questiondata as $data) {
     if ($data == "gradedwrong") {
       $QuestionReport->wrongplusplus();
