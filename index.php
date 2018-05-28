@@ -70,7 +70,7 @@ if ($viewCap) {
                 foreach($students as $student){
                   foreach($quices as $quiz){
                     $response = $DB->get_records_sql('SELECT
-                                                         DISTINCT(qas.userid), qas.state AS response, q.name AS question_name
+                                                         DISTINCT(qas.userid), qas.state AS response, q.name AS question_name, q.id AS question_id
                                                       FROM mdl_quiz_attempts quiza
                                                       JOIN mdl_question_usages qu ON qu.id = quiza.uniqueid
                                                       JOIN mdl_question_attempts qa ON qa.questionusageid = qu.id
@@ -81,22 +81,21 @@ if ($viewCap) {
                                                       WHERE quiza.quiz = '.$quiz->id.' AND qas.state IN ("gradedwrong", "gradedright") AND quiza.userid ='.$student->id);
                     if (sizeof($response)>0) {
                       foreach ($response as $data) { 
-                            if (array_key_exists($data->question_name,$questionresponse)) {
-                             
-                              array_push($questionresponse[$data->question_name], $data->response );
+                            if (array_key_exists(strval($data->question_id),$questionresponse)) {
+                              array_push($questionresponse[strval($data->question_id)][0]["data"], $data->response );
                             }else{
-                              $questionresponse[$data->question_name] = array();
-                              array_push($questionresponse[$data->question_name], $data->response );
+                              $questionresponse[strval($data->question_id)] = array();
+                              array_push($questionresponse[strval($data->question_id)], array("name" => $data->question_name, "data"=> array($data->response)) );
                             }
                       }
                     }
                   }
-                foreach ($questions as $question) {
-                  if (!array_key_exists($question->name,$questionresponse)) {
-                    $questionresponse[$question->name] = array();
-                    array_push($questionresponse[$data->name], array("gradedwrong" => 0,"gradedright" => 0));
+                  foreach ($questions as $question) {
+                    if (!array_key_exists($question->id,$questionresponse)) {
+                      $questionresponse[$question->id] = array();
+                      array_push($questionresponse[$question->id], array("name" =>$question->name, "data"=> array()));
+                    }
                   }
-                }
                 }
               }else{
                 redirect(new moodle_url($reporturl));
@@ -105,7 +104,7 @@ if ($viewCap) {
         case 'global':
             foreach($quices as $quiz){
               $response = $DB->get_records_sql('SELECT
-                                                  DISTINCT(qas.userid), qas.state AS response, q.name AS question_name
+                                                  DISTINCT(qas.userid), qas.state AS response, q.name AS question_name, q.id AS question_id
                                                 FROM mdl_quiz_attempts quiza
                                                 JOIN mdl_question_usages qu ON qu.id = quiza.uniqueid
                                                 JOIN mdl_question_attempts qa ON qa.questionusageid = qu.id
@@ -116,30 +115,31 @@ if ($viewCap) {
                                                 WHERE quiza.quiz = '.$quiz->id.' AND qas.state IN ("gradedwrong", "gradedright")');
               if (sizeof($response)>0) {
                 foreach ($response as $data) { 
-                      if (array_key_exists($data->question_name,$questionresponse)) {
-                      
-                        array_push($questionresponse[$data->question_name], $data->response );
+                      if (array_key_exists(strval($data->question_id),$questionresponse)) {
+                        array_push($questionresponse[strval($data->question_id)][0]["data"], $data->response );
                       }else{
-                        $questionresponse[$data->question_name] = array();
-                        array_push($questionresponse[$data->question_name], $data->response );
+                        $questionresponse[strval($data->question_id)] = array();
+                        array_push($questionresponse[strval($data->question_id)], array("name" => $data->question_name, "data"=> array($data->response)) );
                       }
                 }
               }
             }
+            
             foreach ($questions as $question) {
-              if (!array_key_exists($question->name,$questionresponse)) {
-                $questionresponse[$question->name] = array();
-                array_push($questionresponse[$data->name], array("gradedwrong" => 0,"gradedright" => 0));
+              if (!array_key_exists($question->id,$questionresponse)) {
+                $questionresponse[$question->id] = array();
+                array_push($questionresponse[$question->id], array("name" =>$question->name, "data"=> array()));
               }
             }
+
             break;
         default:
               redirect(new moodle_url($reporturl));
               break;
       }
 
-      foreach ($questionresponse as $questionname => $questiondata) {
-        array_push($questionReport, QuestionReport($questiondata,$questionname));
+      foreach ($questionresponse as $questionid => $questiondata) {
+        array_push($questionReport, QuestionReport($questionid,$questiondata[0]["name"],$questiondata[0]["data"]));
       }
 
 

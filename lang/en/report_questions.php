@@ -13,6 +13,7 @@ $string['questions:view'] = "View questions report";
 $string['question_name'] = "Name";
 $string['question_right'] = "Right";
 $string['question_wrong'] = "Wrong";
+$string['question_id'] = "ID";
 $string['question_rightpercent'] = "Right answers percent";
 $string['question_wrongpercent'] = "Wrong answers percent";
 $string['question_times'] = "Times";

@@ -8,7 +8,7 @@
 
  defined('MOODLE_INTERNAL') || die();
 
-$plugin->version  = 2018050301;
+$plugin->version  = 2018052803;
 $plugin->requires = 2015050500;
 $plugin->component = 'report_questions';
 $plugin->maturity = MATURITY_BETA;

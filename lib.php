@@ -11,8 +11,8 @@ defined('MOODLE_INTERNAL') || die();
 /**
 * Model translate Function
 */
-function QuestionReport($questiondata, $name){
-  $QuestionReport = new \report_questions\questionreport($name,sizeof($questiondata));
+function QuestionReport($id,$name,$questiondata){
+  $QuestionReport = new \report_questions\questionreport($id,$name,sizeof($questiondata));
   foreach ($questiondata as $data) {
     if ($data == "gradedwrong") {
       $QuestionReport->wrongplusplus();
@@ -34,7 +34,7 @@ function output_question_report_data($table,$QuestionsReports){
   $questioninfotable->width = '60%';
   $questioninfotable->attributes['class'] = 'table table-bordered titlesleft';
 
-  $questioninfotable->head = array(get_string('question_name','report_questions'),
+  $questioninfotable->head = array(get_string('question_id','report_questions'),get_string('question_name','report_questions'),
                                    get_string('question_times','report_questions') . '(<i class="fa fa-clock-o times-color" aria-hidden="true"></i>)',
                                    get_string('question_right','report_questions') . '(<i class="fa fa-check right-color" aria-hidden="true"></i>)',
                                    get_string('question_rightpercent','report_questions') . '(<span class="percent-color"><b>%</b></span>)',
@@ -46,7 +46,6 @@ function output_question_report_data($table,$QuestionsReports){
     $datumfromtable = $table->format_row($QuestionReport);
     $questioninfotable->data[] = $datumfromtable;
   }
-  echo $OUTPUT->heading(get_string('questions:componentname', 'report_questions'), 3);
   echo html_writer::table($questioninfotable);
 }
 
